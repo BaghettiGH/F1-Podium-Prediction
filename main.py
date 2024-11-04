@@ -37,14 +37,11 @@ with st.sidebar:
     if st.button("About", use_container_width=True, on_click=set_page_selection, args=('about',)):
         st.session_state.page_selection = 'about'
     
-    if st.button("Dataset", use_container_width=True, on_click=set_page_selection, args=('dataset',)):
+    if st.button("Dataset/Data Cleaning", use_container_width=True, on_click=set_page_selection, args=('dataset',)):
         st.session_state.page_selection = 'dataset'
 
     if st.button("EDA", use_container_width=True, on_click=set_page_selection, args=('eda',)):
         st.session_state.page_selection = "eda"
-
-    if st.button("Data Cleaning / Pre-processing", use_container_width=True, on_click=set_page_selection, args=('data_cleaning',)):
-        st.session_state.page_selection = "data_cleaning"
 
     if st.button("Machine Learning", use_container_width=True, on_click=set_page_selection, args=('machine_learning',)): 
         st.session_state.page_selection = "machine_learning"
@@ -63,7 +60,11 @@ with st.sidebar:
 # Data
 
 # Load data
-dataset = pd.read_csv("data/IRIS.csv")
+df_drivers = pd.read_csv('drivers.csv')
+df_qualifying = pd.read_csv('qualifying.csv', na_values=['\\N',''])
+df_races = pd.read_csv('races.csv')
+df_results = pd.read_csv('results.csv')
+df_constructors = pd.read_csv('constructors.csv')
 
 #######################
 
@@ -79,8 +80,8 @@ if st.session_state.page_selection == "about":
 elif st.session_state.page_selection == "dataset":
     st.header("📊 Dataset")
 
-    st.write("IRIS Flower Dataset")
-    st.write("")
+    st.write("F1 Dataset") #show each dataset here
+    st.write("") 
 
     # Your content for your DATASET page goes here
 
