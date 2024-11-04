@@ -5,11 +5,20 @@ import pandas as pd
 import altair as alt
 import plotly.express as px
 
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn import datasets
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score,confusion_matrix,classification_report
+from sklearn.preprocessing import LabelEncoder
 #######################
 # Page configuration
 st.set_page_config(
-    page_title="Dashboard Template", # Replace this with your Project's Title
-    page_icon="assets/icon.png", # You may replace this with a custom icon or emoji related to your project
+    page_title="F1 Podium Prediction", # Replace this with your Project's Title
+    page_icon="assets/f1logo.png", # You may replace this with a custom icon or emoji related to your project
     layout="wide",
     initial_sidebar_state="expanded")
 
@@ -27,10 +36,10 @@ def set_page_selection(page):
 
 # Sidebar
 with st.sidebar:
-
+    st.image("assets/f1logo.png",use_column_width="auto")
     # Sidebar Title (Change this with your project's title)
-    st.title('Dashboard Template')
-
+    st.title('F1 Podium Prediction')
+    
     # Page Button Navigation
     st.subheader("Pages")
 
@@ -53,18 +62,18 @@ with st.sidebar:
         st.session_state.page_selection = "conclusion"
 
     # Project Members
-    st.subheader("Members")
-    st.markdown("1. Elon Musk\n2. Jeff Bezos\n3. Sam Altman\n4. Mark Zuckerberg")
+    st.subheader("Group 7 Members")
+    st.markdown("1. Dizon, Ma.Sophia\n2. Hojilla, Guillan\n3. Jaso, Louis Patrick\n4. Molina, Patrick Lawrence\n3. Nanwani, Pratik")
 
 #######################
 # Data
 
 # Load data
-df_drivers = pd.read_csv('drivers.csv')
-df_qualifying = pd.read_csv('qualifying.csv', na_values=['\\N',''])
-df_races = pd.read_csv('races.csv')
-df_results = pd.read_csv('results.csv')
-df_constructors = pd.read_csv('constructors.csv')
+df_drivers = pd.read_csv('data/drivers.csv')
+df_qualifying = pd.read_csv('data/qualifying.csv', na_values=['\\N',''])
+df_races = pd.read_csv('data/races.csv')
+df_results = pd.read_csv('data/results.csv')
+df_constructors = pd.read_csv('data/constructors.csv')
 
 #######################
 
