@@ -82,13 +82,13 @@ df_driver_results = pd.merge(df_results,df_drivers[['driverId','driverRef']], on
 df_driver_race_results= pd.merge(df_driver_results,df_races[['raceId','name','year']], on='raceId', how='inner') #merging df_driver_results & races.csv
 df_drivers_quali_race_results = pd.merge(df_driver_race_results,df_qualifying[['raceId','driverId','q1','q2','q3']], on=['raceId','driverId'], how='inner') # merging df_driver_race_results & qualifying.csv
 main_column = ['driverRef','name','year','q1','q2','q3','grid','positionOrder'] #selecting columns
-df_main = df_drivers_quali_race_results[main_column]
-df_main.rename(columns={'driverRef':'driver_name',
+df_main_dirty = df_drivers_quali_race_results[main_column]
+df_main_dirty.rename(columns={'driverRef':'driver_name',
                         'name':'race_name',
                         'year':'race_year',
                         'grid':'starting_grid_position',
                         'positionOrder':'finishing_position'},inplace=True) #renaming columsn
-df_main= df_main.sort_values(by='race_year',ascending=False) #sorting by race_year
+df_main= df_main_dirty.sort_values(by='race_year',ascending=False) #sorting by race_year
 df_main.dropna(subset=['q1'], inplace=True)
 df_main = df_main.fillna(0)
 
@@ -106,6 +106,19 @@ df_main['q1_seconds'] = df_main['q1'].apply(timetoseconds)
 df_main['q2_seconds'] = df_main['q2'].apply(timetoseconds)
 df_main['q3_seconds'] = df_main['q3'].apply(timetoseconds)
 df_main['avg_qualifying_time'] = df_main[['q1_seconds', 'q2_seconds', 'q3_seconds']].mean(axis=1)
+
+######## For Model Training
+df_model = df_main
+encoder = LabelEncoder()
+df_model['driver_Encoded'] = encoder.fit_transform(df_model['driver_name'])
+df_model['race_Encoded'] = encoder.fit_transform(df_model['race_name'])
+
+df_model['top_finish'] = df_main['finishing_position'].apply(lambda x:1 if x<=3 else 0)
+features = ['avg_qualifying_time','starting_grid_position','driver_Encoded']
+X = df_model[features]
+Y = df_model['top_finish']
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+
 
 #######################
 
@@ -177,10 +190,108 @@ elif st.session_state.page_selection == "eda":
 # Data Cleaning Page
 elif st.session_state.page_selection == "data_cleaning":
     st.header("🧼 Data Cleaning and Data Pre-processing")
-    # buffer = io.StringIO()
-    # df_main.info(buf=buffer)
-    # info_str = buffer.getvalue()
-    # st.text(info_str)
+
+    col = st.columns((1.5, 1.5, 1.5,1.5), gap='medium')
+    with col[0]:
+        st.markdown("drivers.csv")
+        st.dataframe(df_drivers,hide_index=True)
+    with col[1]:
+        st.markdown("qualifying.csv")
+        st.dataframe(df_qualifying,hide_index=True)
+    with col[2]:
+        st.markdown("results.csv")
+        st.dataframe(df_results,hide_index=True)
+    with col[3]:
+        st.markdown("races.csv")
+        st.dataframe(df_races,hide_index=True)
+    st.markdown("Since the csv files has primary keys and are in different csvs, merge the datasets using **inner join**")
+    st.markdown("### Merging Datasets")
+    st.code("""
+            df_driver_results = pd.merge(df_results,df_drivers[['driverId','driverRef']], on='driverId',how='inner') #merging driver.csv & results.csv
+            df_driver_race_results= pd.merge(df_driver_results,df_races[['raceId','name','year']], on='raceId', how='inner') #merging df_driver_results & races.csv
+            df_drivers_quali_race_results = pd.merge(df_driver_race_results,df_qualifying[['raceId','driverId','q1','q2','q3']], on=['raceId','driverId'], how='inner') # merging df_driver_race_results & qualifying.csv        
+            """)
+    st.markdown("### Initializing df_main")
+    st.code("""
+            main_column = ['driverRef','name','year','q1','q2','q3','grid','positionOrder'] #selecting columns
+            df_main = df_drivers_quali_race_results[main_column]
+            df_main.rename(columns={'driverRef':'driver_name',
+                        'name':'race_name',
+                        'year':'race_year',
+                        'grid':'starting_grid_position',
+                        'positionOrder':'finishing_position'},inplace=True) #renaming column
+            """)
+    col1 = st.columns((2.5,1.5), gap='medium')
+
+    with col1[0]:
+        st.dataframe(df_main_dirty,hide_index = True)
+    with col1[1]:
+        st.markdown("#### Check for null values")
+        st.dataframe(df_main_dirty.isnull().sum(),use_container_width = True)
+    st.write("df_main still has null values and qualifying times are unusable.")
+    st.markdown("### Data Cleaning")
+    st.code("""
+            df_main.dropna(subset=['q1'], inplace=True)
+            df_main = df_main.fillna(0)
+            """)
+    st.code("""
+            def timetoseconds(time_str): # Turning q1,q2,q3 times to seconds format
+                time_str = str(time_str)
+                if time_str == "0" or pd.isna(time_str):
+                    return 0
+                try:
+                    minutes,seconds = time_str.split(':')
+                    return int(minutes) * 60 + float(seconds)
+                except ValueError:
+                    return 0
+            """)
+    st.code("""
+            df_main['q1_seconds'] = df_main['q1'].apply(timetoseconds)
+            df_main['q2_seconds'] = df_main['q2'].apply(timetoseconds)
+            df_main['q3_seconds'] = df_main['q3'].apply(timetoseconds)
+            df_main['avg_qualifying_time'] = df_main[['q1_seconds', 'q2_seconds', 'q3_seconds']].mean(axis=1)  
+            """)
+    st.dataframe(df_main,hide_index = True)
+    buffer = io.StringIO()
+    df_main.info(buf=buffer)
+    info_str = buffer.getvalue()
+    st.text(info_str)
+    st.markdown("### Encoding Labels")
+    st.code("""
+            encoder = LabelEncoder()
+            df_model['driver_Encoded'] = encoder.fit_transform(df_model['driver_name'])
+            df_model['race_Encoded'] = encoder.fit_transform(df_model['race_name'])
+            df_model['top_finish'] = df_main['finishing_position'].apply(lambda x:1 if x<=3 else 0)
+            """)
+    st.markdown("### Train-Test Split")
+    st.code("""
+            features = ['avg_qualifying_time','starting_grid_position','driver_Encoded']
+            X = df_model[features]
+            Y = df_model['top_finish']
+            """)
+    st.code("""
+            X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+            """)
+    col1 = st.columns((3.5, 3.5), gap='medium')
+
+    # Your content for the EDA page goes here
+
+    with col1[0]:
+        st.markdown("#### X_train")
+        st.dataframe(X_train,hide_index = True,use_container_width = True)
+
+
+    with col1[1]:
+        st.markdown("#### X_test")
+        st.dataframe(X_test, hide_index = True,use_container_width = True)
+    col2 = st.columns((2.5,2.5),gap='medium')
+    with col2[0]:
+        st.markdown("#### Y_train")
+        st.dataframe(Y_train,hide_index = True,use_container_width = True)
+
+    with col2[1]:
+        st.markdown("#### Y_test")
+        st.dataframe(Y_test, hide_index = True,use_container_width = True)
     # Your content for the DATA CLEANING / PREPROCESSING page goes here
 
 # Machine Learning Page
