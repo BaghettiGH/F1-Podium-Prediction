@@ -299,6 +299,53 @@ elif st.session_state.page_selection == "machine_learning":
     st.header("🤖 Machine Learning")
 
     # Your content for the MACHINE LEARNING page goes here
+Model Training
+
+df_model = df_main
+df_model
+
+encoder = LabelEncoder()
+df_model['driver_Encoded'] = encoder.fit_transform(df_model['driver_name'])
+df_model['race_Encoded'] = encoder.fit_transform(df_model['race_name'])
+
+df_model['top_finish'] = df_main['finishing_position'].apply(lambda x:1 if x<=3 else 0)
+
+df_model
+
+features = ['avg_qualifying_time','starting_grid_position','driver_Encoded']
+X = df_model[features]
+Y = df_model['top_finish']
+
+print("X.shape:", (X.shape))
+print("Y.shape:", (Y.shape))
+
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+
+model = LogisticRegression()
+
+model.fit(X_train,Y_train)
+
+Model Evaluation
+
+predict_train = model.predict(X_train)
+
+accuracy_train = accuracy_score(predict_train,Y_train)
+print(f'Accuracy: {accuracy_train * 100:.2f}%')
+
+predict_test = model.predict(X_test)
+accuracy_test = accuracy_score(predict_test,Y_test)
+print(f'Accuracy: {accuracy_test * 100:.2f}%')
+
+classification_rep = classification_report(Y_test, predict_test)
+classification_rep
+
+importance = model.coef_[0]
+importance_df = pd.DataFrame({
+    'Feature': X.columns,
+    'Importance:':importance
+})
+
+importance_df
 
 # Prediction Page
 elif st.session_state.page_selection == "prediction":
