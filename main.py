@@ -171,7 +171,7 @@ elif st.session_state.page_selection == "dataset":
 # EDA Page
 elif st.session_state.page_selection == "eda":
     st.header("📈 Exploratory Data Analysis (EDA)")
-
+  
 
     col = st.columns((1.5, 4.5, 2), gap='medium')
 
@@ -179,13 +179,127 @@ elif st.session_state.page_selection == "eda":
 
     with col[0]:
         st.markdown('#### Graphs Column 1')
+        
+        filtered_df = df_main[(df_main['starting_grid_position'] > 0) & (df_main['finishing_position'] > 0)]
 
+
+        plt.figure(figsize=(10, 6))
+        plt.scatter(filtered_df['starting_grid_position'], filtered_df['finishing_position'], alpha=0.1)
+        plt.title('Scatter Plot: Starting Position vs. Finishing Position')
+        plt.xlabel('Starting Grid Position')
+        plt.ylabel('Finishing Position')
+        plt.gca().invert_yaxis()
+        plt.grid(True)
+        plt.show()
+
+        # In the scatter plot, you may observe that drivers starting from the front tend to have better finishing positions.
 
     with col[1]:
         st.markdown('#### Graphs Column 2')
         
+        plt.figure(figsize=(10, 6))
+        plt.hist(df_main['avg_qualifying_time'], bins=10, color='skyblue', edgecolor='black', alpha=0.7)
+        plt.title("Histogram of Drivers' Average Qualifying Times")
+        plt.xlabel("Average Qualifying Time (seconds)")
+        plt.ylabel("Frequency of Drivers")
+        plt.grid(axis='y', alpha=0.75)
+        plt.show()
+        
+        # The histogram will display the frequency distribution of average qualifying times, helping to identify any central tendencies or spread in qualifying times across drivers. Peaks or clusters may indicate typical qualifying performance ranges.
+        
+        df_qualifying
+        
     with col[2]:
         st.markdown('#### Graphs Column 3')
+        
+        def time_to_seconds(time_str):
+            if pd.isna(time_str):
+                return None
+            time_str = time_str.strip()
+            minutes, seconds = time_str.split(':')
+            return int(minutes) * 60 + float(seconds)
+
+        df_qualifying['q1_seconds'] = df_qualifying['q1'].apply(time_to_seconds)
+        df_qualifying['q2_seconds'] = df_qualifying['q2'].apply(time_to_seconds)
+        df_qualifying['q3_seconds'] = df_qualifying['q3'].apply(time_to_seconds)
+
+        average_q1_per_driver = df_qualifying.groupby('driverId')['q1_seconds'].mean().dropna()
+        average_q2_per_driver = df_qualifying.groupby('driverId')['q2_seconds'].mean().dropna()
+        average_q3_per_driver = df_qualifying.groupby('driverId')['q3_seconds'].mean().dropna()
+
+        plt.figure(figsize=(18, 6))
+
+        # Q1 Histogram
+        plt.subplot(1, 3, 1)
+        plt.hist(average_q1_per_driver, bins=20, color='green', edgecolor='black')
+        plt.xlabel('Average Q1 Time (seconds)')
+        plt.ylabel('Number of Drivers')
+        plt.title('Average Q1 Time')
+
+        # Q2 Histogram
+        plt.subplot(1, 3, 2)
+        plt.hist(average_q2_per_driver, bins=20, color='green', edgecolor='black')
+        plt.xlabel('Average Q2 Time (seconds)')
+        plt.title('Average Q2 Time')
+
+        # Q3 Histogram
+        plt.subplot(1, 3, 3)
+        plt.hist(average_q3_per_driver, bins=20, color='purple', edgecolor='black')
+        plt.xlabel('Average Q3 Time (seconds)')
+        plt.title('Average Q3 Time')
+
+        plt.tight_layout()
+        plt.show()
+        
+        # Based off of the 3 histograms, we can see that in each qualifying session, the most common time reached is just around the 90 second mark.
+        
+        def time_to_seconds(time_str):
+            if pd.isna(time_str):
+                return None
+            time_str = time_str.strip()
+            minutes, seconds = time_str.split(':')
+            return int(minutes) * 60 + float(seconds)
+
+        df_qualifying['q1_seconds'] = df_qualifying['q1'].apply(time_to_seconds)
+        df_qualifying['q2_seconds'] = df_qualifying['q2'].apply(time_to_seconds)
+        df_qualifying['q3_seconds'] = df_qualifying['q3'].apply(time_to_seconds)
+
+        avg_qualifying_times = df_qualifying.groupby('driverId')[['q1_seconds', 'q2_seconds', 'q3_seconds']].mean().dropna().reset_index()
+        merged_data = pd.merge(avg_qualifying_times, df_results, on='driverId')
+        plt.figure(figsize=(14, 8))
+
+        # Q1 Boxplot
+        plt.subplot(1, 3, 1)
+        plt.boxplot(merged_data['q1_seconds'], patch_artist=True, boxprops=dict(facecolor="lightgreen"))
+        plt.xlabel('Average Q1 Time (seconds)')
+        plt.ylabel('Number of Wins')
+        plt.title('Wins vs. Average Q1 Time')
+
+        # Q2 Boxplot
+        plt.subplot(1, 3, 2)
+        plt.boxplot(merged_data['q2_seconds'], patch_artist=True, boxprops=dict(facecolor="lightgreen"))
+        plt.xlabel('Average Q2 Time (seconds)')
+        plt.title('Wins vs. Average Q2 Time')
+
+        # Q3 Boxplot
+        plt.subplot(1, 3, 3)
+        plt.boxplot(merged_data['q3_seconds'], patch_artist=True, boxprops=dict(facecolor="lightgreen"))
+        plt.xlabel('Average Q3 Time (seconds)')
+        plt.title('Wins vs. Average Q3 Time')
+
+        plt.tight_layout()
+        plt.show()
+        
+        # Based on the box plot, average number of wins for each average Q1/Q2/Q3 time are different but they have a common midpoint of around 88 or 87.
+        
+        corr_matrix = df_main[['starting_grid_position', 'avg_qualifying_time', 'finishing_position']].corr()
+        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
+        
+        # From the matrix, we can observe that there is a high positive correlation between finishing_position and starting_grid_position. This means that when the driver starts in higher places such as 14th place. The driver will finish with high finishing position.
+        
+        # Moreover, we can also observe that there is a negative correlation between starting_grid_position and avg_qualifying_time. This means that when their average qualifying time is high. The driver's initial position for the race tends to be low.
+        
+        #Lastly, there is also negative correlation between avg_qualifying_time and finishing_position. This means that when they finished the race in the last place. The driver has a low avg_qualifying_time.
 
 # Data Cleaning Page
 elif st.session_state.page_selection == "data_cleaning":
@@ -299,7 +413,7 @@ elif st.session_state.page_selection == "machine_learning":
     st.header("🤖 Machine Learning")
 
     # Your content for the MACHINE LEARNING page goes here
-Model Training
+# Model Training
 
 df_model = df_main
 df_model
@@ -325,7 +439,7 @@ model = LogisticRegression()
 
 model.fit(X_train,Y_train)
 
-Model Evaluation
+# Model Evaluation
 
 predict_train = model.predict(X_train)
 
