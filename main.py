@@ -352,7 +352,54 @@ elif st.session_state.page_selection == "prediction":
     st.header("👀 Prediction")
 
     # Your content for the PREDICTION page goes here
+predict_train = model.predict(x_train)
+accuracy_train = accuracy_store(predict_train, Y_train)
+print(f'Accuracy: {accuracy_train * 100:.2f}%')
 
+predict_test = model.predict(x_test)
+accuracy_test = accuracy_score(predict_test, Y_test)
+print(f'Accuracy: {accuracy_test * 100:.2f}%')
+
+classification_rep = classification_report(Y_test, predict_test)
+classification_rep
+
+importance = model.coef_[0]
+importance_df = pd.DataFrame({
+    'Feature': X.columns,
+    'Importance:':importance
+})
+
+importance_df
+
+def translate_input(q1_time, q2_time, q3_time, grid_position, driver_name):
+    q1_time = timetoseconds(q1_time)
+    q2_time = timetoseconds(q2_time)
+    q3_time = timetoseconds(q3_time)
+
+avg_q_time = (q1_time + q2_time + q3_time_/3
+              driver_name = driver_name.lower()
+              driver_name_mapping = df_model[['driver_Encoded', 'driver_name']].drop_duplicates().sort_values('driver_Encoded')
+              driver_label = driver_name_mapping.loc[driver_name_mapping['driver_name']==driver_name,'driver_Encoded'].values[0]
+              input_data = [avg_q_time, grid_position, driver_label]
+              predict_instance(input_data, driver_name)
+                     return input_data
+
+def get_prediction_input():
+ lap1 = input("Enter Lap 1 time (format 'm:ss.sss'): ")
+ lap2 = input("Enter Lap 2 time (format 'm:ss.sss'): ")
+ lap3 = input("Enter Lap 3 time (format 'm:ss.sss'): ")
+ position = int(input("Enter starting position: "))
+ driver = input("Enter driver name: ").lower()
+    
+    input_data = translate_input(lap1, lap2, lap3, position, driver)
+    input_data = np.array(input_data).reshape(1, -1)
+    
+    prediction = model.predict(input_data)
+    return prediction
+
+    pred_instance = get_prediction_input()
+    print("Prediction:", pred_instance)
+        
 # Conclusions Page
 elif st.session_state.page_selection == "conclusion":
     st.header("📝 Conclusion")
