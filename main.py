@@ -409,57 +409,81 @@ elif st.session_state.page_selection == "data_cleaning":
     # Your content for the DATA CLEANING / PREPROCESSING page goes here
 
 # Machine Learning Page
-elif st.session_state.page_selection == "machine_learning":
-    st.header("🤖 Machine Learning")
+st.header("🏎️ F1 Podium Prediction using Logistic Regression")
 
-    # Your content for the MACHINE LEARNING page goes here
-# Model Training
+# Brief explanation of Logistic Regression
+st.subheader("Why use Logistic Regression for Predicting F1 Podium?")
+st.markdown("""
+Logistic Regression is a suitable choice for this task because it's a classification algorithm, which can help predict categorical outcomes—in this case, whether a driver finishes on the podium or not.
 
-    df_model = df_main
-    df_model
+### How Logistic Regression Works
+Logistic Regression estimates the probability of a binary event by fitting data to a logistic function. It’s commonly used for binary classification tasks and can be extended to multiclass classification as well.
+""")
 
-    encoder = LabelEncoder()
-    df_model['driver_Encoded'] = encoder.fit_transform(df_model['driver_name'])
-    df_model['race_Encoded'] = encoder.fit_transform(df_model['race_name'])
+# Simulate dataset
+st.subheader("Dataset Preparation")
+st.markdown("Setting up the dataset for training")
+data = {
+    "driver_name": ["Driver A", "Driver B", "Driver C", "Driver D", "Driver E"] * 20,
+    "race_name": ["Race 1", "Race 2", "Race 3", "Race 4", "Race 5"] * 20,
+    "finishing_position": [1, 2, 3, 4, 5] * 20,
+    "top_finish": [1, 1, 1, 0, 0] * 20  # 1 if the driver finished on the podium, 0 otherwise
+}
+df_model = pd.DataFrame(data)
+st.write(df_model.head())
 
-    df_model['top_finish'] = df_main['finishing_position'].apply(lambda x:1 if x<=3 else 0)
+# Encode categorical variables
+st.subheader("Data Preprocessing")
+st.markdown("Encoding categorical variables")
 
-    df_model
+# Encoding driver_name, race_name, and finishing_position
+label_encoders = {}
+for column in ["driver_name", "race_name", "finishing_position"]:
+    le = LabelEncoder()
+    df_model[f"{column}_Encoded"] = le.fit_transform(df_model[column])
+    label_encoders[column] = le
 
-    features = ['avg_qualifying_time','starting_grid_position','driver_Encoded']
-    X = df_model[features]
-    Y = df_model['top_finish']
+# Display encoded DataFrame
+st.write(df_model.head())
 
-    print("X.shape:", (X.shape))
-    print("Y.shape:", (Y.shape))
+# Setting up X and Y dataframes
+st.subheader("Splitting the Data")
+X = df_model[["driver_name_Encoded", "race_name_Encoded", "finishing_position_Encoded"]]
+y = df_model["top_finish"]  # 'top_finish' is the target variable indicating podium finish
 
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+# Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+st.write("Training and Test data prepared.")
+st.write("X_train:", X_train.shape, "y_train:", y_train.shape)
+st.write("X_test:", X_test.shape, "y_test:", y_test.shape)
 
-    model = LogisticRegression()
+# Train the Logistic Regression model
+st.subheader("Training the Logistic Regression Model")
+log_reg = LogisticRegression()
+log_reg.fit(X_train, y_train)
 
-    model.fit(X_train,Y_train)
+# Model Evaluation
+st.subheader("Model Evaluation")
 
-    # Model Evaluation
+# Accuracy on train data
+train_accuracy = log_reg.score(X_train, y_train)
+st.write(f"Train Accuracy: {train_accuracy * 100:.2f}%")
 
-    predict_train = model.predict(X_train)
+# Accuracy on test data
+y_pred = log_reg.predict(X_test)
+test_accuracy = accuracy_score(y_test, y_pred)
+st.write(f"Test Accuracy: {test_accuracy * 100:.2f}%")
 
-    accuracy_train = accuracy_score(predict_train,Y_train)
-    print(f'Accuracy: {accuracy_train * 100:.2f}%')
+# Classification Report
+st.write("Classification Report:")
+st.text(classification_report(y_test, y_pred))
 
-    predict_test = model.predict(X_test)
-    accuracy_test = accuracy_score(predict_test,Y_test)
-    print(f'Accuracy: {accuracy_test * 100:.2f}%')
+# Feature Importance
+st.subheader("Feature Importance")
+feature_importance = pd.Series(log_reg.coef_[0], index=X.columns)
+st.write(feature_importance)
 
-    classification_rep = classification_report(Y_test, predict_test)
-    classification_rep
 
-    importance = model.coef_[0]
-    importance_df = pd.DataFrame({
-        'Feature': X.columns,
-        'Importance:':importance
-    })
-
-    importance_df
 
 # Prediction Page
 elif st.session_state.page_selection == "prediction":
