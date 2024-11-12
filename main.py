@@ -465,8 +465,7 @@ elif st.session_state.page_selection == "machine_learning":
 elif st.session_state.page_selection == "prediction":
     st.header("👀 Prediction")
 
-if 'model' in locals() or 'model' in globals():  
-     col_pred = st.columns((1.5, 3), gap='medium')
+col_pred = st.columns((1.5, 3), gap='medium')
 
 if 'clear' not in st.session_state:
         st.session_state.clear = False
@@ -485,7 +484,7 @@ with col_pred[1]:
         q1_time = st.text_input('Q1 Lap Time (format "m:ss.sss")', value='0:00.000')
         q2_time = st.text_input('Q2 Lap Time (format "m:ss.sss")', value='0:00.000')
         q3_time = st.text_input('Q3 Lap Time (format "m:ss.sss")', value='0:00.000')
-        grid_position = st.number_input('Starting Grid Position', min_value=1, max_value=100, step=1)
+        grid_position = st.number_input('Starting Grid Position', min_value=1, max_value=20, step=1)
         driver_name = st.text_input('Driver Name').lower()
 
         if st.button('Predict Performance'):
