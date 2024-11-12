@@ -466,6 +466,7 @@ elif st.session_state.page_selection == "prediction":
     st.header("👀 Prediction")
 
     # Your content for the PREDICTION page goes here
+if 'model' in locals() or 'model' in globals():  
     predict_train = model.predict(x_train)
     accuracy_train = accuracy_store(predict_train, Y_train)
     print(f'Accuracy: {accuracy_train * 100:.2f}%')
@@ -475,13 +476,20 @@ elif st.session_state.page_selection == "prediction":
     print(f'Accuracy: {accuracy_test * 100:.2f}%')
 
     classification_rep = classification_report(Y_test, predict_test)
-    classification_rep
+    st.text(classification_rep)
 
-    importance = model.coef_[0]
-    importance_df = pd.DataFrame({
-        'Feature': X.columns,
-        'Importance:':importance
-    })
+    if hasattr(model, 'coef_'):
+            importance = model.coef_[0]
+            importance_df = pd.DataFrame({
+                'Feature': X.columns,
+                'Importance': importance
+            })
+            st.dataframe(importance_df)
+        else:
+            st.write("Model does not support feature importances.")
+
+    else:
+        st.error("Model is not defined. Please train or load a model first.")
 
     importance_df
 
