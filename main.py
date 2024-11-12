@@ -487,6 +487,8 @@ if 'model' in locals() or 'model' in globals():
             st.dataframe(importance_df)
     else:
         st.write("Model does not support feature importances.")
+
+
         st.error("Model is not defined. Please train or load a model first.")
 
     importance_df
@@ -501,7 +503,6 @@ if 'model' in locals() or 'model' in globals():
         driver_name_mapping = df_model[['driver_Encoded', 'driver_name']].drop_duplicates().sort_values('driver_Encoded')
         driver_label = driver_name_mapping.loc[driver_name_mapping['driver_name']==driver_name,'driver_Encoded'].values[0]
         input_data = [avg_q_time, grid_position, driver_label]
-        predict_instance(input_data, driver_name)
         return input_data
 
     def get_prediction_input():
@@ -519,7 +520,7 @@ if 'model' in locals() or 'model' in globals():
     
         pred_instance = get_prediction_input()
         print("Prediction:", pred_instance)
-        
+         
 # Conclusions Page
 elif st.session_state.page_selection == "conclusion":
     st.header("📝 Conclusion")
