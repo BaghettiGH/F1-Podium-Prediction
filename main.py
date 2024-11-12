@@ -128,7 +128,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_
 if st.session_state.page_selection == "about":
     st.header("ℹ️ About")
 
-    # Your content for the ABOUT page goes here
+    # Your content for 
 
 # Dataset Page
 elif st.session_state.page_selection == "dataset":
