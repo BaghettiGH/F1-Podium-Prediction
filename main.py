@@ -467,11 +467,11 @@ elif st.session_state.page_selection == "prediction":
 
     # Your content for the PREDICTION page goes here
 if 'model' in locals() or 'model' in globals():  
-    predict_train = model.predict(x_train)
-    accuracy_train = accuracy_store(predict_train, Y_train)
+    predict_train = model.predict(X_train)
+    accuracy_train = accuracy_score(predict_train, Y_train)
     print(f'Accuracy: {accuracy_train * 100:.2f}%')
 
-    predict_test = model.predict(x_test)
+    predict_test = model.predict(X_test)
     accuracy_test = accuracy_score(predict_test, Y_test)
     print(f'Accuracy: {accuracy_test * 100:.2f}%')
 
@@ -485,10 +485,8 @@ if 'model' in locals() or 'model' in globals():
                 'Importance': importance
             })
             st.dataframe(importance_df)
-        else:
-            st.write("Model does not support feature importances.")
-
     else:
+        st.write("Model does not support feature importances.")
         st.error("Model is not defined. Please train or load a model first.")
 
     importance_df
@@ -498,7 +496,7 @@ if 'model' in locals() or 'model' in globals():
         q2_time = timetoseconds(q2_time)
         q3_time = timetoseconds(q3_time)
 
-        avg_q_time = (q1_time + q2_time + q3_time_/3)
+        avg_q_time = (q1_time + q2_time + q3_time/3)
         driver_name = driver_name.lower()
         driver_name_mapping = df_model[['driver_Encoded', 'driver_name']].drop_duplicates().sort_values('driver_Encoded')
         driver_label = driver_name_mapping.loc[driver_name_mapping['driver_name']==driver_name,'driver_Encoded'].values[0]
