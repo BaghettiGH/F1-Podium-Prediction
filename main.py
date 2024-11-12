@@ -465,62 +465,80 @@ elif st.session_state.page_selection == "machine_learning":
 elif st.session_state.page_selection == "prediction":
     st.header("👀 Prediction")
 
-    # Your content for the PREDICTION page goes here
 if 'model' in locals() or 'model' in globals():  
-    predict_train = model.predict(X_train)
-    accuracy_train = accuracy_score(predict_train, Y_train)
-    print(f'Accuracy: {accuracy_train * 100:.2f}%')
+     col_pred = st.columns((1.5, 3), gap='medium')
 
-    predict_test = model.predict(X_test)
-    accuracy_test = accuracy_score(predict_test, Y_test)
-    print(f'Accuracy: {accuracy_test * 100:.2f}%')
+if 'clear' not in st.session_state:
+        st.session_state.clear = False
 
-    classification_rep = classification_report(Y_test, predict_test)
-    st.text(classification_rep)
+with col_pred[0]:
+        with st.expander('Options', expanded=True):
+            show_dataset = st.checkbox('Show Dataset')
+            clear_results = st.button('Clear Results', key='clear_results')
 
-    if hasattr(model, 'coef_'):
-            importance = model.coef_[0]
-            importance_df = pd.DataFrame({
-                'Feature': X.columns,
-                'Importance': importance
-            })
-            st.dataframe(importance_df)
-    else:
-        st.write("Model does not support feature importances.")
+            if clear_results:
+                st.session_state.clear = True
 
+with col_pred[1]:
+        st.markdown("#### 🔍 Model Prediction")
 
-        st.error("Model is not defined. Please train or load a model first.")
+        q1_time = st.text_input('Q1 Lap Time (format "m:ss.sss")', value='0:00.000')
+        q2_time = st.text_input('Q2 Lap Time (format "m:ss.sss")', value='0:00.000')
+        q3_time = st.text_input('Q3 Lap Time (format "m:ss.sss")', value='0:00.000')
+        grid_position = st.number_input('Starting Grid Position', min_value=1, max_value=100, step=1)
+        driver_name = st.text_input('Driver Name').lower()
 
-    importance_df
+        if st.button('Predict Performance'):
+            if 'model' in locals() or 'model' in globals():
+                input_data = input(q1_time, q2_time, q3_time, grid_position, driver_name)
+                input_data = np.array(input_data).reshape(1, -1)
 
-    def translate_input(q1_time, q2_time, q3_time, grid_position, driver_name):
-        q1_time = timetoseconds(q1_time)
-        q2_time = timetoseconds(q2_time)
-        q3_time = timetoseconds(q3_time)
+                prediction = model.predict(input_data)
+                st.markdown(f"The predicted performance category is: **{prediction[0]}**")
 
-        avg_q_time = (q1_time + q2_time + q3_time/3)
-        driver_name = driver_name.lower()
-        driver_name_mapping = df_model[['driver_Encoded', 'driver_name']].drop_duplicates().sort_values('driver_Encoded')
-        driver_label = driver_name_mapping.loc[driver_name_mapping['driver_name']==driver_name,'driver_Encoded'].values[0]
-        input_data = [avg_q_time, grid_position, driver_label]
-        return input_data
+                # Model accuracy on training and test data
+                predict_train = model.predict(X_train)
+                accuracy_train = accuracy_score(Y_train, predict_train)
+                predict_test = model.predict(X_test)
+                accuracy_test = accuracy_score(Y_test, predict_test)
+                
+                # Display accuracy
+                st.markdown(f"**Training Accuracy:** {accuracy_train * 100:.2f}%")
+                st.markdown(f"**Test Accuracy:** {accuracy_test * 100:.2f}%")
 
-    def get_prediction_input():
-        lap1 = input("Enter Lap 1 time (format 'm:ss.sss'): ")
-        lap2 = input("Enter Lap 2 time (format 'm:ss.sss'): ")
-        lap3 = input("Enter Lap 3 time (format 'm:ss.sss'): ")
-        position = int(input("Enter starting position: "))
-        driver = input("Enter driver name: ").lower()
-        
-        input_data = translate_input(lap1, lap2, lap3, position, driver)
-        input_data = np.array(input_data).reshape(1, -1)
-        
-        prediction = model.predict(input_data)
-        return prediction
+                st.text("Classification Report:")
+                st.text(classification_report(Y_test, predict_test))
+
+                if hasattr(model, 'coef_'):
+                    importance_df = pd.DataFrame({
+                        'Feature': X.columns,
+                        'Importance': model.coef_[0]
+                    })
+                    st.subheader("Feature Importances")
+                    st.dataframe(importance_df)
+                else:
+                    st.write("Feature importances are not available for this model.")
+                    st.error("Model is not defined. Please train or load a model first.")
+
+if show_dataset:
+        st.subheader("Dataset")
+        st.dataframe(df_model.head(), use_container_width=True)
+
+def timetoseconds(lap_time):
+    minutes, seconds = lap_time.split(':')
+    return int(minutes) * 60 + float(seconds)
+
+def translate_input(q1_time, q2_time, q3_time, grid_position, driver_name):
+    q1_time = timetoseconds(q1_time)
+    q2_time = timetoseconds(q2_time)
+    q3_time = timetoseconds(q3_time)
     
-        pred_instance = get_prediction_input()
-        print("Prediction:", pred_instance)
-         
+    avg_q_time = (q1_time + q2_time + q3_time) / 3
+    driver_name_mapping = df_model[['driver_Encoded', 'driver_name']].drop_duplicates()
+    driver_label = driver_name_mapping.loc[driver_name_mapping['driver_name'] == driver_name, 'driver_Encoded'].values[0]
+    
+    return [avg_q_time, grid_position, driver_label]
+      
 # Conclusions Page
 elif st.session_state.page_selection == "conclusion":
     st.header("📝 Conclusion")
