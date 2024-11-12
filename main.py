@@ -191,7 +191,7 @@ elif st.session_state.page_selection == "eda":
         plt.gca().invert_yaxis()
         plt.grid(True)
         plt.show()
-
+        
         # In the scatter plot, you may observe that drivers starting from the front tend to have better finishing positions.
 
     with col[1]:
@@ -415,104 +415,104 @@ elif st.session_state.page_selection == "machine_learning":
     # Your content for the MACHINE LEARNING page goes here
 # Model Training
 
-df_model = df_main
-df_model
+    df_model = df_main
+    df_model
 
-encoder = LabelEncoder()
-df_model['driver_Encoded'] = encoder.fit_transform(df_model['driver_name'])
-df_model['race_Encoded'] = encoder.fit_transform(df_model['race_name'])
+    encoder = LabelEncoder()
+    df_model['driver_Encoded'] = encoder.fit_transform(df_model['driver_name'])
+    df_model['race_Encoded'] = encoder.fit_transform(df_model['race_name'])
 
-df_model['top_finish'] = df_main['finishing_position'].apply(lambda x:1 if x<=3 else 0)
+    df_model['top_finish'] = df_main['finishing_position'].apply(lambda x:1 if x<=3 else 0)
 
-df_model
+    df_model
 
-features = ['avg_qualifying_time','starting_grid_position','driver_Encoded']
-X = df_model[features]
-Y = df_model['top_finish']
+    features = ['avg_qualifying_time','starting_grid_position','driver_Encoded']
+    X = df_model[features]
+    Y = df_model['top_finish']
 
-print("X.shape:", (X.shape))
-print("Y.shape:", (Y.shape))
+    print("X.shape:", (X.shape))
+    print("Y.shape:", (Y.shape))
 
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 
-model = LogisticRegression()
+    model = LogisticRegression()
 
-model.fit(X_train,Y_train)
+    model.fit(X_train,Y_train)
 
-# Model Evaluation
+    # Model Evaluation
 
-predict_train = model.predict(X_train)
+    predict_train = model.predict(X_train)
 
-accuracy_train = accuracy_score(predict_train,Y_train)
-print(f'Accuracy: {accuracy_train * 100:.2f}%')
+    accuracy_train = accuracy_score(predict_train,Y_train)
+    print(f'Accuracy: {accuracy_train * 100:.2f}%')
 
-predict_test = model.predict(X_test)
-accuracy_test = accuracy_score(predict_test,Y_test)
-print(f'Accuracy: {accuracy_test * 100:.2f}%')
+    predict_test = model.predict(X_test)
+    accuracy_test = accuracy_score(predict_test,Y_test)
+    print(f'Accuracy: {accuracy_test * 100:.2f}%')
 
-classification_rep = classification_report(Y_test, predict_test)
-classification_rep
+    classification_rep = classification_report(Y_test, predict_test)
+    classification_rep
 
-importance = model.coef_[0]
-importance_df = pd.DataFrame({
-    'Feature': X.columns,
-    'Importance:':importance
-})
+    importance = model.coef_[0]
+    importance_df = pd.DataFrame({
+        'Feature': X.columns,
+        'Importance:':importance
+    })
 
-importance_df
+    importance_df
 
 # Prediction Page
 elif st.session_state.page_selection == "prediction":
     st.header("👀 Prediction")
 
     # Your content for the PREDICTION page goes here
-predict_train = model.predict(x_train)
-accuracy_train = accuracy_store(predict_train, Y_train)
-print(f'Accuracy: {accuracy_train * 100:.2f}%')
+    predict_train = model.predict(x_train)
+    accuracy_train = accuracy_store(predict_train, Y_train)
+    print(f'Accuracy: {accuracy_train * 100:.2f}%')
 
-predict_test = model.predict(x_test)
-accuracy_test = accuracy_score(predict_test, Y_test)
-print(f'Accuracy: {accuracy_test * 100:.2f}%')
+    predict_test = model.predict(x_test)
+    accuracy_test = accuracy_score(predict_test, Y_test)
+    print(f'Accuracy: {accuracy_test * 100:.2f}%')
 
-classification_rep = classification_report(Y_test, predict_test)
-classification_rep
+    classification_rep = classification_report(Y_test, predict_test)
+    classification_rep
 
-importance = model.coef_[0]
-importance_df = pd.DataFrame({
-    'Feature': X.columns,
-    'Importance:':importance
-})
+    importance = model.coef_[0]
+    importance_df = pd.DataFrame({
+        'Feature': X.columns,
+        'Importance:':importance
+    })
 
-importance_df
+    importance_df
 
-def translate_input(q1_time, q2_time, q3_time, grid_position, driver_name):
-    q1_time = timetoseconds(q1_time)
-    q2_time = timetoseconds(q2_time)
-    q3_time = timetoseconds(q3_time)
+    def translate_input(q1_time, q2_time, q3_time, grid_position, driver_name):
+        q1_time = timetoseconds(q1_time)
+        q2_time = timetoseconds(q2_time)
+        q3_time = timetoseconds(q3_time)
 
-avg_q_time = (q1_time + q2_time + q3_time_/3
-              driver_name = driver_name.lower()
-              driver_name_mapping = df_model[['driver_Encoded', 'driver_name']].drop_duplicates().sort_values('driver_Encoded')
-              driver_label = driver_name_mapping.loc[driver_name_mapping['driver_name']==driver_name,'driver_Encoded'].values[0]
-              input_data = [avg_q_time, grid_position, driver_label]
-              predict_instance(input_data, driver_name)
-                     return input_data
+        avg_q_time = (q1_time + q2_time + q3_time_/3)
+        driver_name = driver_name.lower()
+        driver_name_mapping = df_model[['driver_Encoded', 'driver_name']].drop_duplicates().sort_values('driver_Encoded')
+        driver_label = driver_name_mapping.loc[driver_name_mapping['driver_name']==driver_name,'driver_Encoded'].values[0]
+        input_data = [avg_q_time, grid_position, driver_label]
+        predict_instance(input_data, driver_name)
+        return input_data
 
-def get_prediction_input():
- lap1 = input("Enter Lap 1 time (format 'm:ss.sss'): ")
- lap2 = input("Enter Lap 2 time (format 'm:ss.sss'): ")
- lap3 = input("Enter Lap 3 time (format 'm:ss.sss'): ")
- position = int(input("Enter starting position: "))
- driver = input("Enter driver name: ").lower()
+    def get_prediction_input():
+        lap1 = input("Enter Lap 1 time (format 'm:ss.sss'): ")
+        lap2 = input("Enter Lap 2 time (format 'm:ss.sss'): ")
+        lap3 = input("Enter Lap 3 time (format 'm:ss.sss'): ")
+        position = int(input("Enter starting position: "))
+        driver = input("Enter driver name: ").lower()
+        
+        input_data = translate_input(lap1, lap2, lap3, position, driver)
+        input_data = np.array(input_data).reshape(1, -1)
+        
+        prediction = model.predict(input_data)
+        return prediction
     
-    input_data = translate_input(lap1, lap2, lap3, position, driver)
-    input_data = np.array(input_data).reshape(1, -1)
-    
-    prediction = model.predict(input_data)
-    return prediction
-
-    pred_instance = get_prediction_input()
-    print("Prediction:", pred_instance)
+        pred_instance = get_prediction_input()
+        print("Prediction:", pred_instance)
         
 # Conclusions Page
 elif st.session_state.page_selection == "conclusion":
