@@ -479,7 +479,7 @@ with col_pred[0]:
                 st.session_state.clear = True
 
 with col_pred[1]:
-        st.markdown("#### 🔍 Model Prediction")
+        st.markdown("#### 🚗 F1 Result Predictor")
 
         q1_time = st.text_input('Q1 Lap Time (format "m:ss.sss")', value='0:00.000')
         q2_time = st.text_input('Q2 Lap Time (format "m:ss.sss")', value='0:00.000')
