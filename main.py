@@ -143,6 +143,15 @@ Users can upload files or input parameters, and the app processes this data to g
 It might also run machine learning models, providing predictions or evaluating performance in real time. 
 Streamlit makes complex data tasks accessible and easy to explore for users.
 
+#Pages
+
+Dataset - Brief description of the Formula 1 Dataset used in this dashboard.
+EDA - Exploratory Data Analysis of the F1 Dataset. Highlights relationship of initial positionl, qualifying times and finishing on the podium. Includes bar graphs,histogram, scatter graph, etc.
+Data Cleaning / Pre-processing - Data cleaning and pre-processing steps such as encoding the species column and splitting the dataset into training and testing sets.
+Machine Learning - Training Logistic Regression model. This page also includes the model evaluation, feature importance and classification report.
+Prediction - Prediction page where users can input values to predict if the driver will finish on the podium.
+Conclusion - Summary of the insights and observations from the EDA and model training
+
 # Dataset Page
 elif st.session_state.page_selection == "dataset":
     st.header("📊 Dataset")
