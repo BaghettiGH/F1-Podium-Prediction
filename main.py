@@ -173,8 +173,8 @@ elif st.session_state.page_selection == "eda":
     st.header("📈 Exploratory Data Analysis (EDA)")
   
     # Your content for the EDA page goes here   
-    col = st.columns((2.5,4.5),gap = 'medium')
-
+    col = st.columns((3.5,4.5),gap = 'medium')
+    col6 = st.columns((1.5,4.5,1.5))
     with col[0]:
         filtered_df = df_main[(df_main['starting_grid_position'] > 0) & (df_main['finishing_position'] > 0)]
 
@@ -274,15 +274,15 @@ elif st.session_state.page_selection == "eda":
         plt.tight_layout()
         st.pyplot(fig)
         st.write("Based on the box plot, average number of wins for each average Q1/Q2/Q3 time are different but they have a common midpoint of around 88 or 87.")
-        
-    fig,ax = plt.subplots(figsize =(8,6))
-    corr_matrix = df_main[['starting_grid_position', 'avg_qualifying_time', 'finishing_position']].corr()
-    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', ax=ax)
-    st.pyplot(fig, use_container_width = True)
-    st.markdown(""" 
-    From the matrix, we can observe that there is a high positive correlation between finishing_position and starting_grid_position. This means that when the driver starts in higher places such as 14th place. The driver will finish with high finishing position.
-    Moreover, we can also observe that there is a negative correlation between starting_grid_position and avg_qualifying_time. This means that when their average qualifying time is high. The driver's initial position for the race tends to be low.
-    Lastly, there is also negative correlation between avg_qualifying_time and finishing_position. This means that when they finished the race in the last place. The driver has a low avg_qualifying_time.
+    with col6[1]:    
+        fig,ax = plt.subplots(figsize =(8,6))
+        corr_matrix = df_main[['starting_grid_position', 'avg_qualifying_time', 'finishing_position']].corr()
+        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', ax=ax)
+        st.pyplot(fig, use_container_width = True)
+        st.markdown(""" 
+                From the matrix, we can observe that there is a high positive correlation between finishing_position and starting_grid_position. This means that when the driver starts in higher places such as 14th place. The driver will finish with high finishing position.
+                Moreover, we can also observe that there is a negative correlation between starting_grid_position and avg_qualifying_time. This means that when their average qualifying time is high. The driver's initial position for the race tends to be low.
+                Lastly, there is also negative correlation between avg_qualifying_time and finishing_position. This means that when they finished the race in the last place. The driver has a low avg_qualifying_time.
                 """)
 # Data Cleaning Page
 elif st.session_state.page_selection == "data_cleaning":
@@ -403,10 +403,8 @@ elif st.session_state.page_selection == "machine_learning":
     ### How Logistic Regression Works
     Logistic Regression estimates the probability of a binary event by fitting data to a logistic function. It’s commonly used for binary classification tasks and can be extended to multiclass classification as well.
     """)
-
     # Simulate dataset
     st.subheader("Dataset Preparation")
-    st.markdown("Setting up the dataset for training")
     df_main = df_model
     st.dataframe(df_model.head(),hide_index = True)
 
@@ -421,6 +419,7 @@ elif st.session_state.page_selection == "machine_learning":
 
     df_driver_encoded=df_model[['driver_name', 'driver_Encoded']].drop_duplicates().sort_values('driver_Encoded').reset_index(drop=True)
     df_race_encoded = df_model[['race_name','race_Encoded']].drop_duplicates().sort_values('race_Encoded').reset_index(drop = True)
+
     # Display encoded DataFrame
     col3 = st.columns((3.5, 3.5), gap='medium')
     with col3[0]:
@@ -433,6 +432,7 @@ elif st.session_state.page_selection == "machine_learning":
             log_reg = LogisticRegression()
             log_reg.fit(X_train, Y_train)
             """)
+    
     log_reg = LogisticRegression()
     log_reg.fit(X_train, Y_train)
     col4 = st.columns((3.5, 3.5), gap='medium')
@@ -456,7 +456,7 @@ elif st.session_state.page_selection == "machine_learning":
     st.subheader("Feature Importance")
     feature_importance = pd.Series(log_reg.coef_[0], index=X.columns)
     st.write(feature_importance)
-
+    st.write('The `starting_grid_position` has a high magnitude and negative correlation in affecting the prediction of the model. This means that there is a high chance of being on the podium if the driver has a low `starting_grid_position`.')
 
 
 # Prediction Page
@@ -464,10 +464,36 @@ elif st.session_state.page_selection == "machine_learning":
 elif st.session_state.page_selection == "prediction":
     st.header("👀 Prediction")
 
+    log_reg = LogisticRegression()
+    log_reg.fit(X_train, Y_train)
+
     col_pred = st.columns((1.5, 3), gap='medium')
+    def translate_input(q1_time,q2_time,q3_time,grid_position,driver_name):
+        q1_time= timetoseconds(q1_time)
+        q2_time= timetoseconds(q2_time)
+        q3_time= timetoseconds(q3_time)
+        avg_q_time = (q1_time+q2_time+q3_time)/3
+        driver_name = driver_name.lower()
+        driver_name_mapping = df_model[['driver_Encoded', 'driver_name']].drop_duplicates().sort_values('driver_Encoded')
+        if driver_name not in driver_name_mapping['driver_name'].values:
+            st.warning(f"Driver name: '{driver_name} cannot be found")
+            return None
+        driver_label = driver_name_mapping.loc[driver_name_mapping['driver_name']==driver_name,'driver_Encoded'].values[0]
+        input_data = [avg_q_time,grid_position,driver_label]
+        predict_instance(input_data,driver_name)
+        
+        return input_data
+    def predict_instance(input_data,name):
+        input_data = np.array(input_data).reshape(1,-1)
+        pred_instance = log_reg.predict(input_data)
+        if(pred_instance [0]==1):
+            st.markdown(f"**{name.capitalize()}** has a high chance of finishing on the podium!")
+        else:
+            st.markdown(f"**{name.capitalize()}** has a low chance of finishing on the podium.")
 
     if 'clear' not in st.session_state:
         st.session_state.clear = False
+
 
     with col_pred[0]:
         with st.expander('Options', expanded=True):
@@ -476,70 +502,73 @@ elif st.session_state.page_selection == "prediction":
 
             if clear_results:
                 st.session_state.clear = True
+                q1_time=0
+                q2_time=0
+                q3_time=0
 
     with col_pred[1]:
         st.markdown("#### 🚗 F1 Result Predictor")
 
-        q1_time = st.text_input('Q1 Lap Time (format "m:ss.sss")', value='0:00.000')
-        q2_time = st.text_input('Q2 Lap Time (format "m:ss.sss")', value='0:00.000')
-        q3_time = st.text_input('Q3 Lap Time (format "m:ss.sss")', value='0:00.000')
+        q1_time = st.text_input('Q1 Lap Time (format "m:ss.sss")', placeholder='0:00.000')
+        q2_time = st.text_input('Q2 Lap Time (format "m:ss.sss")', placeholder='0:00.000')
+        q3_time = st.text_input('Q3 Lap Time (format "m:ss.sss")', placeholder='0:00.000')
         grid_position = st.number_input('Starting Grid Position', min_value=1, max_value=20, step=1)
         driver_name = st.text_input('Driver Name').lower()
 
         if st.button('Predict Performance'):
-            if 'model' in locals() or 'model' in globals():
-                input_data = translate_input(q1_time, q2_time, q3_time, grid_position, driver_name)
-                input_data = np.array(input_data).reshape(1, -1)
+            translate_input(q1_time,q2_time,q3_time,grid_position,driver_name)
+            
 
-                prediction = model.predict(input_data)
-                st.markdown(f"The predicted performance category is: **{prediction[0]}**")
-
-                # Model accuracy on training and test data
-                predict_train = model.predict(X_train)
-                accuracy_train = accuracy_score(Y_train, predict_train)
-                predict_test = model.predict(X_test)
-                accuracy_test = accuracy_score(Y_test, predict_test)
-
-                # Display accuracy
-                st.markdown(f"**Training Accuracy:** {accuracy_train * 100:.2f}%")
-                st.markdown(f"**Test Accuracy:** {accuracy_test * 100:.2f}%")
-
-                st.text("Classification Report:")
-                st.text(classification_report(Y_test, predict_test))
-
-                if hasattr(model, 'coef_'):
-                    importance_df = pd.DataFrame({
-                        'Feature': X.columns,
-                        'Importance': model.coef_[0]
-                    })
-                    st.subheader("Feature Importances")
-                    st.dataframe(importance_df)
-                else:
-                    st.write("Feature importances are not available for this model.")
-            else:
-                st.error("Model is not defined. Please train or load a model first.")
+              
 
     if show_dataset:
         st.subheader("Dataset")
-        st.dataframe(df_model.head(), use_container_width=True)
+        st.dataframe(df_model, use_container_width=True,hide_index=True)
 
-    def timetoseconds(lap_time):
-        minutes, seconds = lap_time.split(':')
-        return int(minutes) * 60 + float(seconds)
-
-    def translate_input(q1_time, q2_time, q3_time, grid_position, driver_name):
-        q1_time = timetoseconds(q1_time)
-        q2_time = timetoseconds(q2_time)
-        q3_time = timetoseconds(q3_time)
-
-        avg_q_time = (q1_time + q2_time + q3_time) / 3
-        driver_name_mapping = df_model[['driver_Encoded', 'driver_name']].drop_duplicates()
-        driver_label = driver_name_mapping.loc[driver_name_mapping['driver_name'] == driver_name, 'driver_Encoded'].values[0]
-
-        return [avg_q_time, grid_position, driver_label]
 
 # Conclusions Page
 elif st.session_state.page_selection == "conclusion":
     st.header("📝 Conclusion")
     # Your content for the CONCLUSION page goes here
+    st.markdown("""
+                
+    Through exploratory data analysis and training of `Logistic Regression` on the **Formula 1 dataset**, the key insights and observations are:
 
+    #### 1. 📊 **Dataset Characteristics**:
+                
+    - The average `starting_grid_position` and average `finishing_position` has high variation which could impact model performance negatively.
+    - The average q3 time has extremely high variation.
+    - Further data cleaning needs to be performed such as managing outliers.
+    #### 2. 📝 **Feature Distributions and Separability**:
+                
+    - Starting from the front tend to have better finishing positions.
+    - The most common lap time obtained in qualifying sessions is around **90** seconds
+    - Average qualifying lap time is under 100 seconds.
+    - Drivers with faster Q3 times have more wins.
+    - There is a high positive correlation between `finishing_position` and `starting_grid_position`.
+    - There is a moderate negative correlation between `avg_qualifying_time` and `finishing_position`.
+                
+    #### 3. 📈 **Model Performance (Decision Tree Classifier)**:
+            
+    - The model acquired an accuracy of **89.33%** for train set.
+    - The model acquired an accuracy of **87.33%** for test set.
+    - Precision in classifying loss is **91%**.
+    - Precision in classifying win is **60%**.
+    - Recall for loss is **95%**.
+    - Recall for win  is **44%**.
+    - F1-Score for loss is **93%**.
+    - F1-Score for win is **51%**.
+    - Feature Importance: 
+        - avg_qualifying_time: 0.0036
+        - starting_grid_position: -0.4116
+        - driver_Encoded: -0.0023
+    - From the results above, the model performs better when determining if the driver will not be on the podium. The models seems to be biased towards predicting losses, this means that there is class imbalance in the dataset.
+    - The `starting_grid_position` appears to be the most important feature when predicting a win for the driver. This suggests that a lower `starting_grid_position` increases the chances of winning.
+
+    ##### **Summing up:**  
+    From this data science activity, it is evident that the dataset needs more cleaning as there is still a high variation in some features used in the model.
+    Despite having a **87.33%** model accuracy, the model seems to be biased towards predicting losses and still needs improvement on predicting podiums which is the objective of the ML model.
+    Some recommendations to improve model performance are: managing class imbalance, outliers, and adding more features that are relevant in predicting a podium win.
+    Regardless of the improvements needed, the students were able to display and see correlation between variables using data visualization.
+    Moreover, the students have also managed make an F1 Podium Predictor based on user inputs           
+    """)
