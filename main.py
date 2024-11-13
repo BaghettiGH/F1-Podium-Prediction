@@ -127,9 +127,31 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_
 # About Page
 if st.session_state.page_selection == "about":
     st.header("ℹ️ About")
+    st.markdown("""
+    In Formula 1, qualifying determines starting positions for the race. It’s split into three sessions:
+	- Q1: All drivers participate, with the five slowest eliminated and starting from positions 16-20.
+	- Q2: The remaining 15 compete, with five more eliminated for positions 11-15.
+	- Q3: The fastest 10 fight for the top 10 grid spots, with the quickest taking pole position.
 
-    # Your content for 
+    In some races, a sprint qualifying format determines the grid through a shorter race on Saturday.
 
+    Starting positions are crucial for podium predictions, as front-runners have better chances due to fewer overtakes needed.
+
+
+    A Streamlit web application allows users to interactively analyze and visualize data. 
+    Users can upload files or input parameters, and the app processes this data to generate insights through visualizations like charts and graphs. 
+    It might also run machine learning models, providing predictions or evaluating performance in real time. 
+    Streamlit makes complex data tasks accessible and easy to explore for users.
+
+    #Pages
+
+    Dataset - Brief description of the Formula 1 Dataset used in this dashboard.
+    EDA - Exploratory Data Analysis of the F1 Dataset. Highlights relationship of initial position, qualifying times and finishing on the podium. Includes bar graphs,histogram, scatter graph, etc.
+    Data Cleaning / Pre-processing - Data cleaning and pre-processing steps such as encoding the species column and splitting the dataset into training and testing sets.
+    Machine Learning - Training Logistic Regression model. This page also includes the model evaluation, feature importance and classification report.
+    Prediction - Prediction page where users can input values to predict if the driver will finish on the podium.
+    Conclusion - Summary of the insights and observations from the EDA and model training
+        """)
 # Dataset Page
 elif st.session_state.page_selection == "dataset":
     st.header("📊 Dataset")
