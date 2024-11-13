@@ -128,7 +128,20 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_
 if st.session_state.page_selection == "about":
     st.header("ℹ️ About")
 
-    # Your content for 
+    In Formula 1, qualifying determines starting positions for the race. It’s split into three sessions:
+	•	Q1: All drivers participate, with the five slowest eliminated and starting from positions 16-20.
+	•	Q2: The remaining 15 compete, with five more eliminated for positions 11-15.
+	•	Q3: The fastest 10 fight for the top 10 grid spots, with the quickest taking pole position.
+
+In some races, a sprint qualifying format determines the grid through a shorter race on Saturday.
+
+Starting positions are crucial for podium predictions, as front-runners have better chances due to fewer overtakes needed.
+
+
+A Streamlit web application allows users to interactively analyze and visualize data. 
+Users can upload files or input parameters, and the app processes this data to generate insights through visualizations like charts and graphs. 
+It might also run machine learning models, providing predictions or evaluating performance in real time. 
+Streamlit makes complex data tasks accessible and easy to explore for users.
 
 # Dataset Page
 elif st.session_state.page_selection == "dataset":
