@@ -2,7 +2,7 @@
 A Streamlit web application that predicts if a driver will finish on the podium (1st,2nd, or 3rd Place) in a Formula 1 Grand Prix Race using their qualifying times and initial position. This application performs **EDA**, **Data Preprocessing**, and **Supervised Machine Learning** to predict instances using **Logistic Regression**.
 
 
-![Main Page Screenshot](screenshots/main_page_screenshot.png)
+![Main Page Screenshot](screenshots/main_page_screenshot.jpg)
 
 
 
