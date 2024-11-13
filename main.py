@@ -495,8 +495,34 @@ elif st.session_state.page_selection == "prediction":
 
     log_reg = LogisticRegression()
     log_reg.fit(X_train, Y_train)
+    driver_images = {
+        "albon": "assets/albon.png",
+        "alonso": "assets/alonso.png",
+        "bearman": "assets/bearman.png",
+        "gasly": "assets/gasly.png",
+        "hamilton": "assets/hamilton.png",
+        "hulkenberg": "assets/hulkenberg.png",
+        "kevin_magnussen": "assets/kevin_magnussen.png",
+        "lawson": "assets/lawson.png",
+        "leclerc": "assets/leclerc.png",
+        "max_verstappen": "assets/max_verstappen.png",
+        "norris": "assets/norris.png",
+        "ocon": "assets/ocon.png",
+        "perez": "assets/perez.png",
+        "piastri": "assets/piastri.png",
+        "russel": "assets/russel.png",
+        "sainz": "assets/sainz.png",
+        "stroll": "assets/stroll.png",
+        "tsunoda": "assets/tsunoda.png",
+    }
+
 
     col_pred = st.columns((1.5, 3), gap='medium')
+    def driver_img(driverName):
+        if driverName in driver_images:
+            st.image(driver_images[driverName],width=350)
+        else:
+            return None
     def translate_input(q1_time,q2_time,q3_time,grid_position,driver_name):
         q1_time= timetoseconds(q1_time)
         q2_time= timetoseconds(q2_time)
@@ -511,10 +537,12 @@ elif st.session_state.page_selection == "prediction":
         input_data = [avg_q_time,grid_position,driver_label]
         predict_instance(input_data,driver_name)
         
+        
         return input_data
     def predict_instance(input_data,name):
         input_data = np.array(input_data).reshape(1,-1)
         pred_instance = log_reg.predict(input_data)
+        driver_img(name )
         if(pred_instance [0]==1):
             st.markdown(f"**{name.capitalize()}** has a high chance of finishing on the podium!")
         else:
@@ -553,6 +581,13 @@ elif st.session_state.page_selection == "prediction":
     if show_dataset:
         st.subheader("Dataset")
         st.dataframe(df_model, use_container_width=True,hide_index=True)
+
+
+
+
+
+
+
 
 
 # Conclusions Page
