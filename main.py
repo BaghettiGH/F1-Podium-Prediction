@@ -172,46 +172,34 @@ elif st.session_state.page_selection == "dataset":
 elif st.session_state.page_selection == "eda":
     st.header("📈 Exploratory Data Analysis (EDA)")
   
-
-    col = st.columns((1.5, 4.5, 2), gap='medium')
-
-    # Your content for the EDA page goes here
+    # Your content for the EDA page goes here   
+    col = st.columns((2.5,4.5),gap = 'medium')
 
     with col[0]:
-        st.markdown('#### Graphs Column 1')
-        
         filtered_df = df_main[(df_main['starting_grid_position'] > 0) & (df_main['finishing_position'] > 0)]
 
-
-        plt.figure(figsize=(10, 6))
-        plt.scatter(filtered_df['starting_grid_position'], filtered_df['finishing_position'], alpha=0.1)
+        fig, ax = plt.subplots(figsize =(10,6))
+        ax.scatter(filtered_df['starting_grid_position'], filtered_df['finishing_position'], alpha=0.1)
         plt.title('Scatter Plot: Starting Position vs. Finishing Position')
         plt.xlabel('Starting Grid Position')
         plt.ylabel('Finishing Position')
         plt.gca().invert_yaxis()
         plt.grid(True)
-        plt.show()
+        st.pyplot(fig)
         
-        # In the scatter plot, you may observe that drivers starting from the front tend to have better finishing positions.
+        st.write("In the scatter plot, you may observe that drivers starting from the front tend to have better finishing positions.")
 
-    with col[1]:
-        st.markdown('#### Graphs Column 2')
-        
-        plt.figure(figsize=(10, 6))
-        plt.hist(df_main['avg_qualifying_time'], bins=10, color='skyblue', edgecolor='black', alpha=0.7)
+    
+        fig,ax = plt.subplots(figsize=(10, 6))
+        ax.hist(df_main['avg_qualifying_time'], bins=10, color='skyblue', edgecolor='black', alpha=0.7)
         plt.title("Histogram of Drivers' Average Qualifying Times")
         plt.xlabel("Average Qualifying Time (seconds)")
         plt.ylabel("Frequency of Drivers")
         plt.grid(axis='y', alpha=0.75)
-        plt.show()
+        st.pyplot(fig)
         
-        # The histogram will display the frequency distribution of average qualifying times, helping to identify any central tendencies or spread in qualifying times across drivers. Peaks or clusters may indicate typical qualifying performance ranges.
-        
-        df_qualifying
-        
-    with col[2]:
-        st.markdown('#### Graphs Column 3')
-        
+        st.write('The histogram will display the frequency distribution of average qualifying times, helping to identify any central tendencies or spread in qualifying times across drivers. Peaks or clusters may indicate typical qualifying performance ranges.')
+    with col[1]:        
         def time_to_seconds(time_str):
             if pd.isna(time_str):
                 return None
@@ -227,31 +215,28 @@ elif st.session_state.page_selection == "eda":
         average_q2_per_driver = df_qualifying.groupby('driverId')['q2_seconds'].mean().dropna()
         average_q3_per_driver = df_qualifying.groupby('driverId')['q3_seconds'].mean().dropna()
 
-        plt.figure(figsize=(18, 6))
+        fig,ax = plt.subplots(1, 3, figsize=(18, 6))
 
         # Q1 Histogram
-        plt.subplot(1, 3, 1)
-        plt.hist(average_q1_per_driver, bins=20, color='green', edgecolor='black')
+        ax[0].hist(average_q1_per_driver, bins=20, color='green', edgecolor='black')
         plt.xlabel('Average Q1 Time (seconds)')
         plt.ylabel('Number of Drivers')
         plt.title('Average Q1 Time')
 
         # Q2 Histogram
-        plt.subplot(1, 3, 2)
-        plt.hist(average_q2_per_driver, bins=20, color='green', edgecolor='black')
+        ax[1].hist(average_q2_per_driver, bins=20, color='green', edgecolor='black')
         plt.xlabel('Average Q2 Time (seconds)')
         plt.title('Average Q2 Time')
 
         # Q3 Histogram
-        plt.subplot(1, 3, 3)
-        plt.hist(average_q3_per_driver, bins=20, color='purple', edgecolor='black')
+        ax[2].hist(average_q3_per_driver, bins=20, color='purple', edgecolor='black')
         plt.xlabel('Average Q3 Time (seconds)')
         plt.title('Average Q3 Time')
 
         plt.tight_layout()
-        plt.show()
+        st.pyplot(fig)
         
-        # Based off of the 3 histograms, we can see that in each qualifying session, the most common time reached is just around the 90 second mark.
+        st.write("Based off of the 3 histograms, we can see that in each qualifying session, the most common time reached is just around the 90 second mark.")
         
         def time_to_seconds(time_str):
             if pd.isna(time_str):
@@ -266,41 +251,39 @@ elif st.session_state.page_selection == "eda":
 
         avg_qualifying_times = df_qualifying.groupby('driverId')[['q1_seconds', 'q2_seconds', 'q3_seconds']].mean().dropna().reset_index()
         merged_data = pd.merge(avg_qualifying_times, df_results, on='driverId')
-        plt.figure(figsize=(14, 8))
+        fig, axs = plt.subplots(1, 3, figsize=(14, 8))
 
         # Q1 Boxplot
-        plt.subplot(1, 3, 1)
-        plt.boxplot(merged_data['q1_seconds'], patch_artist=True, boxprops=dict(facecolor="lightgreen"))
+        axs[0].boxplot(merged_data['q1_seconds'], patch_artist=True, boxprops=dict(facecolor="lightgreen"))
         plt.xlabel('Average Q1 Time (seconds)')
         plt.ylabel('Number of Wins')
         plt.title('Wins vs. Average Q1 Time')
 
         # Q2 Boxplot
-        plt.subplot(1, 3, 2)
-        plt.boxplot(merged_data['q2_seconds'], patch_artist=True, boxprops=dict(facecolor="lightgreen"))
+
+        axs[1].boxplot(merged_data['q2_seconds'], patch_artist=True, boxprops=dict(facecolor="lightgreen"))
         plt.xlabel('Average Q2 Time (seconds)')
         plt.title('Wins vs. Average Q2 Time')
 
         # Q3 Boxplot
-        plt.subplot(1, 3, 3)
-        plt.boxplot(merged_data['q3_seconds'], patch_artist=True, boxprops=dict(facecolor="lightgreen"))
+
+        axs[2].boxplot(merged_data['q3_seconds'], patch_artist=True, boxprops=dict(facecolor="lightgreen"))
         plt.xlabel('Average Q3 Time (seconds)')
         plt.title('Wins vs. Average Q3 Time')
 
         plt.tight_layout()
-        plt.show()
+        st.pyplot(fig)
+        st.write("Based on the box plot, average number of wins for each average Q1/Q2/Q3 time are different but they have a common midpoint of around 88 or 87.")
         
-        # Based on the box plot, average number of wins for each average Q1/Q2/Q3 time are different but they have a common midpoint of around 88 or 87.
-        
-        corr_matrix = df_main[['starting_grid_position', 'avg_qualifying_time', 'finishing_position']].corr()
-        sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
-        
-        # From the matrix, we can observe that there is a high positive correlation between finishing_position and starting_grid_position. This means that when the driver starts in higher places such as 14th place. The driver will finish with high finishing position.
-        
-        # Moreover, we can also observe that there is a negative correlation between starting_grid_position and avg_qualifying_time. This means that when their average qualifying time is high. The driver's initial position for the race tends to be low.
-        
-        #Lastly, there is also negative correlation between avg_qualifying_time and finishing_position. This means that when they finished the race in the last place. The driver has a low avg_qualifying_time.
-
+    fig,ax = plt.subplots(figsize =(8,6))
+    corr_matrix = df_main[['starting_grid_position', 'avg_qualifying_time', 'finishing_position']].corr()
+    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', ax=ax)
+    st.pyplot(fig, use_container_width = True)
+    st.markdown(""" 
+    From the matrix, we can observe that there is a high positive correlation between finishing_position and starting_grid_position. This means that when the driver starts in higher places such as 14th place. The driver will finish with high finishing position.
+    Moreover, we can also observe that there is a negative correlation between starting_grid_position and avg_qualifying_time. This means that when their average qualifying time is high. The driver's initial position for the race tends to be low.
+    Lastly, there is also negative correlation between avg_qualifying_time and finishing_position. This means that when they finished the race in the last place. The driver has a low avg_qualifying_time.
+                """)
 # Data Cleaning Page
 elif st.session_state.page_selection == "data_cleaning":
     st.header("🧼 Data Cleaning and Data Pre-processing")
@@ -408,93 +391,85 @@ elif st.session_state.page_selection == "data_cleaning":
         st.dataframe(Y_test, hide_index = True,use_container_width = True)
     # Your content for the DATA CLEANING / PREPROCESSING page goes here
 
-# Machine Learning Page
-st.header("🏎️ F1 Podium Prediction using Logistic Regression")
+elif st.session_state.page_selection == "machine_learning":
+    # Machine Learning Page
+    st.header("🏎️ Machine Learning")
 
-# Brief explanation of Logistic Regression
-st.subheader("Why use Logistic Regression for Predicting F1 Podium?")
-st.markdown("""
-Logistic Regression is a suitable choice for this task because it's a classification algorithm, which can help predict categorical outcomes—in this case, whether a driver finishes on the podium or not.
+    # Brief explanation of Logistic Regression
+    st.subheader("Why use Logistic Regression for Predicting F1 Podium?")
+    st.markdown("""
+    Logistic Regression is a suitable choice for this task because it's a classification algorithm, which can help predict categorical outcomes—in this case, whether a driver finishes on the podium or not.
 
-### How Logistic Regression Works
-Logistic Regression estimates the probability of a binary event by fitting data to a logistic function. It’s commonly used for binary classification tasks and can be extended to multiclass classification as well.
-""")
+    ### How Logistic Regression Works
+    Logistic Regression estimates the probability of a binary event by fitting data to a logistic function. It’s commonly used for binary classification tasks and can be extended to multiclass classification as well.
+    """)
 
-# Simulate dataset
-st.subheader("Dataset Preparation")
-st.markdown("Setting up the dataset for training")
-data = {
-    "driver_name": ["Driver A", "Driver B", "Driver C", "Driver D", "Driver E"] * 20,
-    "race_name": ["Race 1", "Race 2", "Race 3", "Race 4", "Race 5"] * 20,
-    "finishing_position": [1, 2, 3, 4, 5] * 20,
-    "top_finish": [1, 1, 1, 0, 0] * 20  # 1 if the driver finished on the podium, 0 otherwise
-}
-df_model = pd.DataFrame(data)
-st.write(df_model.head())
+    # Simulate dataset
+    st.subheader("Dataset Preparation")
+    st.markdown("Setting up the dataset for training")
+    df_main = df_model
+    st.dataframe(df_model.head(),hide_index = True)
 
-# Encode categorical variables
-st.subheader("Data Preprocessing")
-st.markdown("Encoding categorical variables")
+    # Encode categorical variables
+    st.subheader("Data Preprocessing")
+    st.markdown("Encoding categorical variables")
 
-# Encoding driver_name, race_name, and finishing_position
-label_encoders = {}
-for column in ["driver_name", "race_name", "finishing_position"]:
-    le = LabelEncoder()
-    df_model[f"{column}_Encoded"] = le.fit_transform(df_model[column])
-    label_encoders[column] = le
+    # Encoding driver_name, race_name, and finishing_position
+    encoder = LabelEncoder()
+    df_model['driver_Encoded'] = encoder.fit_transform(df_model['driver_name'])
+    df_model['race_Encoded'] = encoder.fit_transform(df_model['race_name'])
 
-# Display encoded DataFrame
-st.write(df_model.head())
+    df_driver_encoded=df_model[['driver_name', 'driver_Encoded']].drop_duplicates().sort_values('driver_Encoded').reset_index(drop=True)
+    df_race_encoded = df_model[['race_name','race_Encoded']].drop_duplicates().sort_values('race_Encoded').reset_index(drop = True)
+    # Display encoded DataFrame
+    col3 = st.columns((3.5, 3.5), gap='medium')
+    with col3[0]:
+        st.dataframe(df_driver_encoded,hide_index = True,use_container_width = True)
+    with col3[1]:
+        st.dataframe(df_race_encoded, hide_index = True,use_container_width = True)
 
-# Setting up X and Y dataframes
-st.subheader("Splitting the Data")
-X = df_model[["driver_name_Encoded", "race_name_Encoded", "finishing_position_Encoded"]]
-y = df_model["top_finish"]  # 'top_finish' is the target variable indicating podium finish
+    st.subheader("Training the Logistic Regression Model")
+    st.code("""
+            log_reg = LogisticRegression()
+            log_reg.fit(X_train, Y_train)
+            """)
+    log_reg = LogisticRegression()
+    log_reg.fit(X_train, Y_train)
+    col4 = st.columns((3.5, 3.5), gap='medium')
+    with col4[0]:
+        # Model Evaluation
+        st.subheader("Model Evaluation")
+        # Accuracy on train data
+        train_accuracy = log_reg.score(X_train, Y_train)
+        st.write(f"Train Accuracy: {train_accuracy * 100:.2f}%")
 
-# Train-Test Split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-st.write("Training and Test data prepared.")
-st.write("X_train:", X_train.shape, "y_train:", y_train.shape)
-st.write("X_test:", X_test.shape, "y_test:", y_test.shape)
+        # Accuracy on test data
+        y_pred = log_reg.predict(X_test)
+        test_accuracy = accuracy_score(Y_test, y_pred)
+        st.write(f"Test Accuracy: {test_accuracy * 100:.2f}%")
+    with col4[1]:
+    # Classification Report
+        st.write("Classification Report:")
+        st.text(classification_report(Y_test, y_pred))
 
-# Train the Logistic Regression model
-st.subheader("Training the Logistic Regression Model")
-log_reg = LogisticRegression()
-log_reg.fit(X_train, y_train)
-
-# Model Evaluation
-st.subheader("Model Evaluation")
-
-# Accuracy on train data
-train_accuracy = log_reg.score(X_train, y_train)
-st.write(f"Train Accuracy: {train_accuracy * 100:.2f}%")
-
-# Accuracy on test data
-y_pred = log_reg.predict(X_test)
-test_accuracy = accuracy_score(y_test, y_pred)
-st.write(f"Test Accuracy: {test_accuracy * 100:.2f}%")
-
-# Classification Report
-st.write("Classification Report:")
-st.text(classification_report(y_test, y_pred))
-
-# Feature Importance
-st.subheader("Feature Importance")
-feature_importance = pd.Series(log_reg.coef_[0], index=X.columns)
-st.write(feature_importance)
+    # Feature Importance
+    st.subheader("Feature Importance")
+    feature_importance = pd.Series(log_reg.coef_[0], index=X.columns)
+    st.write(feature_importance)
 
 
 
 # Prediction Page
+
 elif st.session_state.page_selection == "prediction":
     st.header("👀 Prediction")
 
-col_pred = st.columns((1.5, 3), gap='medium')
+    col_pred = st.columns((1.5, 3), gap='medium')
 
-if 'clear' not in st.session_state:
+    if 'clear' not in st.session_state:
         st.session_state.clear = False
 
-with col_pred[0]:
+    with col_pred[0]:
         with st.expander('Options', expanded=True):
             show_dataset = st.checkbox('Show Dataset')
             clear_results = st.button('Clear Results', key='clear_results')
@@ -502,7 +477,7 @@ with col_pred[0]:
             if clear_results:
                 st.session_state.clear = True
 
-with col_pred[1]:
+    with col_pred[1]:
         st.markdown("#### 🚗 F1 Result Predictor")
 
         q1_time = st.text_input('Q1 Lap Time (format "m:ss.sss")', value='0:00.000')
@@ -513,7 +488,7 @@ with col_pred[1]:
 
         if st.button('Predict Performance'):
             if 'model' in locals() or 'model' in globals():
-                input_data = input(q1_time, q2_time, q3_time, grid_position, driver_name)
+                input_data = translate_input(q1_time, q2_time, q3_time, grid_position, driver_name)
                 input_data = np.array(input_data).reshape(1, -1)
 
                 prediction = model.predict(input_data)
@@ -524,7 +499,7 @@ with col_pred[1]:
                 accuracy_train = accuracy_score(Y_train, predict_train)
                 predict_test = model.predict(X_test)
                 accuracy_test = accuracy_score(Y_test, predict_test)
-                
+
                 # Display accuracy
                 st.markdown(f"**Training Accuracy:** {accuracy_train * 100:.2f}%")
                 st.markdown(f"**Test Accuracy:** {accuracy_test * 100:.2f}%")
@@ -541,29 +516,30 @@ with col_pred[1]:
                     st.dataframe(importance_df)
                 else:
                     st.write("Feature importances are not available for this model.")
-                    st.error("Model is not defined. Please train or load a model first.")
+            else:
+                st.error("Model is not defined. Please train or load a model first.")
 
-if show_dataset:
+    if show_dataset:
         st.subheader("Dataset")
         st.dataframe(df_model.head(), use_container_width=True)
 
-def timetoseconds(lap_time):
-    minutes, seconds = lap_time.split(':')
-    return int(minutes) * 60 + float(seconds)
+    def timetoseconds(lap_time):
+        minutes, seconds = lap_time.split(':')
+        return int(minutes) * 60 + float(seconds)
 
-def translate_input(q1_time, q2_time, q3_time, grid_position, driver_name):
-    q1_time = timetoseconds(q1_time)
-    q2_time = timetoseconds(q2_time)
-    q3_time = timetoseconds(q3_time)
-    
-    avg_q_time = (q1_time + q2_time + q3_time) / 3
-    driver_name_mapping = df_model[['driver_Encoded', 'driver_name']].drop_duplicates()
-    driver_label = driver_name_mapping.loc[driver_name_mapping['driver_name'] == driver_name, 'driver_Encoded'].values[0]
-    
-    return [avg_q_time, grid_position, driver_label]
-      
+    def translate_input(q1_time, q2_time, q3_time, grid_position, driver_name):
+        q1_time = timetoseconds(q1_time)
+        q2_time = timetoseconds(q2_time)
+        q3_time = timetoseconds(q3_time)
+
+        avg_q_time = (q1_time + q2_time + q3_time) / 3
+        driver_name_mapping = df_model[['driver_Encoded', 'driver_name']].drop_duplicates()
+        driver_label = driver_name_mapping.loc[driver_name_mapping['driver_name'] == driver_name, 'driver_Encoded'].values[0]
+
+        return [avg_q_time, grid_position, driver_label]
+
 # Conclusions Page
 elif st.session_state.page_selection == "conclusion":
     st.header("📝 Conclusion")
-
     # Your content for the CONCLUSION page goes here
+
