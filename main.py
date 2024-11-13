@@ -126,6 +126,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_
 
 # About Page
 if st.session_state.page_selection == "about":
+    
     st.header("ℹ️ About")
 
     st.markdown("""
@@ -140,7 +141,11 @@ if st.session_state.page_selection == "about":
         - **Q1**: All drivers participate, with the five slowest eliminated and starting from positions 16-20.
         - **Q2**: The remaining 15 compete, with five more eliminated for positions 11-15.
         - **Q3**: The fastest 10 fight for the top 10 grid spots, with the quickest taking pole position.
-    """)
+    """)    
+    col8 = st.columns((1.5,4.5,1.5))
+    with col8[1]:
+        st.image("assets/f1_pic.jpg",width=800,caption='Formula 1')
+
 
     st.markdown("""
     In some races, a sprint qualifying format determines the grid through a shorter race on Saturday.
@@ -539,7 +544,7 @@ elif st.session_state.page_selection == "prediction":
         grid_position = st.number_input('Starting Grid Position', min_value=1, max_value=20, step=1)
         driver_name = st.text_input('Driver Name').lower()
 
-        if st.button('Predict Performance'):
+        if st.button('Predict Podium'):
             translate_input(q1_time,q2_time,q3_time,grid_position,driver_name)
             
 
